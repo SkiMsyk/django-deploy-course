@@ -1,0 +1,22 @@
+{% extends 'myapp/base.html' %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-9">
+    <br>  
+    <img src="https://mdbcdn.b-cdn.net/img/new/standard/city/062.webp" class="card-img-top" alt="Chicago Skyscrapers"/>
+      <div class="card-body">
+        <h5 class="card-title">{{ object.title }}</h5>
+        <p class="card-text">{{ object.content }}</p>
+        <a href="{% url 'myapp:post_update' object.id %}" type="button" class="btn btn-outline-dark btn-rounded" data-mdb-ripple-color="dark">
+          Edit
+        </a>
+        <a href="{% url 'myapp:post_delete' object.id %}" type="button" class="btn btn-outline-danger btn-rounded" data-mdb-ripple-color="dark">
+          Delete
+        </a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

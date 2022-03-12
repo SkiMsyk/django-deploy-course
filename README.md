@@ -38,7 +38,7 @@ if your device is already using port 8000, kill the process or edit docker-compo
 
 ```
 port:
-	- 8000:8000
+  - 8000:8000
 ```
 
 
