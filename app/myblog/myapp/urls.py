@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import Index, PostCreate, PostDelete, PostDetail, PostUpdate, PostList, Login, Logout, SignUp
+from .views import Index, PostCreate, PostDelete, PostDetail, PostUpdate, PostList, Login, Logout, SignUp, AddLike
 
 app_name = 'myapp'
 
@@ -13,4 +13,5 @@ urlpatterns = [
     path('login/', Login.as_view(), name='login'),
     path('logout/', Logout.as_view(), name='logout'),
     path('signup/', SignUp.as_view(), name='signup'),
+    path('like/<int:post_id>/', AddLike, name='addlike')
 ]

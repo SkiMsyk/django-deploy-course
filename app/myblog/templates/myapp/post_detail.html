@@ -1,4 +1,5 @@
 {% extends 'myapp/base.html' %}
+{% load static %}
 
 {% block content %}
 
@@ -9,14 +10,30 @@
       <div class="card-body">
         <h5 class="card-title">{{ object.title }}</h5>
         <p class="card-text">{{ object.content }}</p>
-        <a href="{% url 'myapp:post_update' object.id %}" type="button" class="btn btn-outline-dark btn-rounded" data-mdb-ripple-color="dark">
-          Edit
+
+        {% if is_liked %}
+        <a class="btn" href="{% url 'myapp:addlike' object.pk %}" style="background-color:#13ae4b; color:white">
+          Liked
         </a>
-        <a href="{% url 'myapp:post_delete' object.id %}" type="button" class="btn btn-outline-danger btn-rounded" data-mdb-ripple-color="dark">
-          Delete
+        {% else %}
+        <a class="btn" href="{% url 'myapp:addlike' object.pk %}" style="background-color:#FF6699; color:white">
+          Like
         </a>
+        {% endif %}
+        </a>
+
+        {% if user.is_authenticated and object.author == user %}
+        <div>
+          <br>
+          <a href="{% url 'myapp:post_update' object.pk %}" type="button" class="btn btn-outline-dark btn-rounded" data-mdb-ripple-color="dark">
+            Edit
+          </a>
+          <a href="{% url 'myapp:post_delete' object.pk %}" type="button" class="btn btn-outline-danger btn-rounded" data-mdb-ripple-color="dark">
+            Delete
+          </a>
+        </div>
+        {% endif %}        
     </div>
   </div>
 </div>
-
 {% endblock %}

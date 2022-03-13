@@ -1,14 +1,23 @@
 from django.utils import timezone
-from django.shortcuts import render, resolve_url
+from django.shortcuts import redirect, render, resolve_url
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import TemplateView, CreateView, DetailView, UpdateView, DeleteView, ListView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-from .models import Post
+from .models import Post, Like
 from .forms import PostForm, LoginForm, SignUpForm
+
+
+class OnlyMyPostMixin(UserPassesTestMixin):
+    raise_exception = True
+    def test_func(self):
+        post = Post.objects.get(id = self.kwargs['pk'])
+        return post.author == self.request.user
 
 
 class Index(TemplateView):
@@ -23,19 +32,33 @@ class Index(TemplateView):
         return context
     
     
-class PostCreate(CreateView):
+class PostCreate(OnlyMyPostMixin, CreateView):
     model = Post
     form_class = PostForm
     success_url = reverse_lazy('myapp:index')
     template_name = 'myapp/post_form.html'
     
+    def form_valid(self, form):
+        form.instance.author_id = self.request.user.id
+        return super(PostCreate, self).form_valid(form)
+    
+    def get_success_url(self):
+        messages.success(self.request, 'New post has beed registered.')
+        return resolve_url('myapp:index')
+    
 
 class PostDetail(DetailView):
     model = Post
     template_name = 'myapp/post_detail.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        is_liked = Like.objects.filter(user = self.request.user).filter(post = context['object'].pk).count() > 0
+        context['is_liked'] = is_liked
+        return context
 
 
-class PostUpdate(UpdateView):
+class PostUpdate(OnlyMyPostMixin, UpdateView):
     model = Post
     form_class = PostForm 
     
@@ -45,7 +68,7 @@ class PostUpdate(UpdateView):
     
     
     
-class PostDelete(DeleteView):
+class PostDelete(OnlyMyPostMixin, DeleteView):
     model = Post
     
     def get_success_url(self):
@@ -80,4 +103,18 @@ class SignUp(CreateView):
         self.object = user
         messages.info(self.request, 'Your account has registered successfully.')
         return HttpResponseRedirect(self.get_success_url())
-    
+
+
+@login_required
+def AddLike(request, post_id):
+    post = Post.objects.get(id = post_id)
+    is_liked = Like.objects.filter(user = request.user).filter(post = post_id).count()
+    if is_liked > 0:
+        messages.info(request, 'You already liked this post.')
+    else:
+        like = Like()
+        like.user = request.user
+        like.post = post
+        like.save()
+        messages.success(request, 'Added your liked articles!')
+    return redirect('myapp:post_detail', post.id)
