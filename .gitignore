@@ -1,7 +1,8 @@
 app/myblog/myapp/migrations
 app/myblog/myapp/__pycache__
-
 app/myblog/__pycache__
+app/myblog/media/images/*
+
 
 # database
 db.sqlite3
